@@ -11,6 +11,7 @@ public class Configure {
 
 	private static Map<String, Properties> propertiesMap = new ConcurrentHashMap<>();
 
+	// TODO
 	public static String loadPropertieValue(String file, String key) throws UnsupportedEncodingException, IOException {
 		if (propertiesMap.get(file) != null) {
 			return propertiesMap.get(file).getProperty(key);
