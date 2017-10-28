@@ -1,12 +1,24 @@
 package org.hum.resthttp.transport.jdktcp;
 
+import org.hum.resthttp.transport.enumtype.HttpStatusEnum;
+
+/**
+ * 由于我只打算实现一个简单的Http容器，我就抛弃了复杂的字段，仅保存我需要的内容。
+ * <pre>
+ * HTTP规范响应结构：
+ * 	1.响应行
+ *  2.响应头
+ *  3.空行
+ *  4.响应报文
+ * </pre>
+ */
 public class HttpResponse {
 
 	private String protocolVersion;
-	private String code;
+	private HttpStatusEnum code;
 	private String content;
 
-	public HttpResponse(String protocolVersion, String code, String content) {
+	public HttpResponse(String protocolVersion, HttpStatusEnum code, String content) {
 		this.protocolVersion = protocolVersion;
 		this.code = code;
 		this.content = content;
@@ -16,7 +28,7 @@ public class HttpResponse {
 		return protocolVersion;
 	}
 
-	public String getCode() {
+	public HttpStatusEnum getCode() {
 		return code;
 	}
 

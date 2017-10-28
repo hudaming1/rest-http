@@ -59,7 +59,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<DefaultHttpR
 		
 		// 如果抛出的是restful异常，则遵循HTTP错误码标准输出
 		if (cause instanceof RestfulException) {
-			response.setStatus(NettyHttpUtils.parseStatus(((RestfulException) cause).getCode()));
+			response.setStatus(NettyHttpUtils.parseStatus(((RestfulException) cause).getHttpCode().getCode()));
 		}
 		ctx.fireExceptionCaught(cause);
 		ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);

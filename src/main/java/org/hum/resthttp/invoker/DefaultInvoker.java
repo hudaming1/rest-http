@@ -45,7 +45,9 @@ public class DefaultInvoker extends AbstractInvoker {
 		CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
 		LocalVariableAttribute attr = (LocalVariableAttribute) codeAttribute.getAttribute(LocalVariableAttribute.tag);
 
-		// 如果调用方法非static，则第一个参数肯定是this
+		/*
+		 * JVM规范规定：非static方法，第一个隐式参数为this，第二个开始才是我们代码的参数
+		 */
 		int addLength = methodInfo.isStaticInitializer() ? 0 : 1;
 		
 		for (int i = addLength ; i < parameters.size() + addLength ;i ++ ) {

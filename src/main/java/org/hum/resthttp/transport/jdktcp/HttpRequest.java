@@ -2,6 +2,16 @@ package org.hum.resthttp.transport.jdktcp;
 
 import java.util.Map;
 
+/**
+ * 由于我只打算实现一个简单的Http容器，我就抛弃了复杂的字段，仅保存我需要的内容。
+ * <pre>
+ * HTTP规范请求结构：
+ * 	1.请求行
+ *  2.请求头
+ *  3.空行
+ *  4.请求报文
+ * </pre>
+ */
 public class HttpRequest {
 
 	private String protocolVersion;
@@ -19,6 +29,7 @@ public class HttpRequest {
 		} else if (params == null || params.isEmpty()) {
 			throw new IllegalArgumentException("request params mustn't be null!");
 		}
+		this.protocolVersion = protocolVersion;
 		this.method = method;
 		this.url = url;
 		this.params = params;

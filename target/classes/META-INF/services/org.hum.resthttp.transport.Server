@@ -1,1 +1,1 @@
-org.hum.resthttp.transport.netty.NettyServer
+org.hum.resthttp.transport.jdktcp.TcpServer
