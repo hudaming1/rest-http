@@ -1,11 +1,8 @@
 package org.hum.resthttp.transport.netty;
 
-import java.util.concurrent.Future;
-
 import org.hum.resthttp.common.RestfulException;
 import org.hum.resthttp.invoker.bean.Invocation;
 import org.hum.resthttp.invoker.bean.Result;
-import org.hum.resthttp.invoker.holder.InvokerHolder;
 import org.hum.resthttp.serialization.Serialization;
 
 import io.netty.buffer.Unpooled;
@@ -20,32 +17,33 @@ import io.netty.handler.codec.http.HttpVersion;
 
 public class NettyServerHandler extends SimpleChannelInboundHandler<DefaultHttpRequest> {
 
-	private InvokerHolder invokerHolder;
+	private NettyHandleCallback nettyCallable;
 	private Serialization serialization;
 
-	public NettyServerHandler(InvokerHolder invokerHolder, Serialization serialization) {
-		this.invokerHolder = invokerHolder;
+	public NettyServerHandler(NettyHandleCallback nettyCallable, Serialization serialization) {
 		this.serialization = serialization;
+		this.nettyCallable = nettyCallable;
 	}
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, DefaultHttpRequest request) throws Exception {
-
+		
 		/*
 		 * 1.创建Invocation
-		 *  TODO 这里设计的不好，如果method不符合定义要求，仍然会解析参数，发生调用，最好在这层能拦住
+		 *  bad smell: 这里设计的不好，如果method不符合定义要求，仍然会解析参数，发生调用，最好在这层能拦住
 		 */
 		Invocation invocation = new Invocation(request.method().name(), NettyHttpUtils.getUrl(request), NettyHttpUtils.requestParams2Map(request));
 		
-		// 2.非阻塞调用
-		Future<Result> result = invokerHolder.invoke(invocation);
-
+		// 2.调用(这里交给NettySever来处理)
+		Result result = nettyCallable.handler(invocation);
+		
 		// 3.返回结果
-		ctx.writeAndFlush(wrapResult(result.get())).addListener(ChannelFutureListener.CLOSE);
+		ctx.writeAndFlush(wrapResult(result)).addListener(ChannelFutureListener.CLOSE);
 	}
 
 	private HttpResponse wrapResult(Result result) {
 		String jsonString = serialization.serialize(result.getData());
+		// TODO 这里的version应该从context取
 		HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(jsonString.getBytes()));
 		return response;
 	}

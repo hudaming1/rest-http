@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.hum.resthttp.common.ErrorCode;
+import org.hum.resthttp.common.HttpErrorCode;
 import org.hum.resthttp.common.RestfulException;
 import org.hum.resthttp.common.ServiceLoader;
 import org.hum.resthttp.invoker.Invoker;
@@ -36,7 +36,7 @@ public class DefaultInvokerHolder implements InvokerHolder {
 	public Invoker get(String url) {
 		MethodHolder methodHolder = mapper.get(url);
 		if (methodHolder == null) {
-			throw new RestfulException(ErrorCode._404, "url [" + url + "] not mappered");
+			throw new RestfulException(HttpErrorCode._404, "url [" + url + "] not mappered");
 		}
 		return invokerWrapper.create(methodHolder.getMethod(), methodHolder.getInstance());
 	}
@@ -58,7 +58,7 @@ public class DefaultInvokerHolder implements InvokerHolder {
 	private void validate(Invocation invocation) {
 		MethodHolder methodHolder = mapper.get(invocation.getUrl());
 		if (!methodHolder.getHttpMethod().getDesc().equalsIgnoreCase(invocation.getMethod())) {
-			throw new RestfulException(ErrorCode._405, "method don't support");
+			throw new RestfulException(HttpErrorCode._405, "method don't support");
 		}
 	}
 }

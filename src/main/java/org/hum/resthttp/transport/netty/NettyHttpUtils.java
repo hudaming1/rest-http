@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.hum.resthttp.common.ErrorCode;
+import org.hum.resthttp.common.HttpErrorCode;
 
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
@@ -54,9 +54,9 @@ public class NettyHttpUtils {
 	}
 
 	public static HttpResponseStatus parseStatus(String errorCode) {
-		if (ErrorCode._404.equals(errorCode)) {
+		if (HttpErrorCode._404.equals(errorCode)) {
 			return HttpResponseStatus.NOT_FOUND;
-		} else if (ErrorCode._405.equals(errorCode)) {
+		} else if (HttpErrorCode._405.equals(errorCode)) {
 			return HttpResponseStatus.METHOD_NOT_ALLOWED;
 		} else {
 			return HttpResponseStatus.INTERNAL_SERVER_ERROR;

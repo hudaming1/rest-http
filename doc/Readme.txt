@@ -6,6 +6,9 @@
    添加logger
    线程池最好也做成可配置化，让客户端可扩展。
    
+1.实现上下文
+2.实现TcpServer
+   
 
 Server - 解耦通信（目前是Netty）
 InvokerWrapper - 解耦？？目前抽离出来是受dubbo设计影响(例如 failover、cluster、mock等)

@@ -1,6 +1,11 @@
 package org.hum.resthttp.transport.netty;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.hum.resthttp.common.ServerException;
+import org.hum.resthttp.invoker.bean.Invocation;
+import org.hum.resthttp.invoker.bean.Result;
 import org.hum.resthttp.transport.AbstractServer;
 import org.hum.resthttp.transport.config.ServerConfig;
 
@@ -14,7 +19,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 
-public class NettyServer extends AbstractServer {
+public class NettyServer extends AbstractServer implements NettyHandleCallback {
 	
 	final NettyServer nettyServer = this;
 
@@ -31,7 +36,7 @@ public class NettyServer extends AbstractServer {
 				protected void initChannel(Channel ch) throws Exception {
 					ch.pipeline().addLast(new HttpResponseEncoder());
 					ch.pipeline().addLast(new HttpRequestDecoder());
-					ch.pipeline().addLast(new NettyServerHandler(nettyServer.invokerHolder, nettyServer.serialization));
+					ch.pipeline().addLast(new NettyServerHandler(nettyServer, nettyServer.serialization));
 				}
 			});
 			ChannelFuture future = bootStrap.bind(serverConfig.getPort()).sync();
@@ -40,22 +45,18 @@ public class NettyServer extends AbstractServer {
 		} catch (Exception ce) {
 			throw new ServerException("netty server start occured exception", ce);
 		} finally {
-			// TODO 这里的异常应该怎么处理好？
-			try {
-				bossGroup.shutdownGracefully().sync();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			try {
-				workerGroup.shutdownGracefully().sync();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			bossGroup.shutdownGracefully();
+			workerGroup.shutdownGracefully();
 		}
 	}
 
 	@Override
 	public void close() {
-		
+	}
+
+	@Override
+	public Result handler(Invocation invocation) throws InterruptedException, ExecutionException {
+		Future<Result> future = invokerHolder.invoke(invocation);
+		return future.get();
 	}
 }

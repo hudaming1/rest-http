@@ -1,5 +1,8 @@
 package org.hum.resthttp.common;
 
+/**
+ * Restful异常使用这个类，如果是服务器内部异常，使用ServerException
+ */
 public class RestfulException extends RuntimeException {
 	
 	private static final long serialVersionUID = 6632263251127341599L;
