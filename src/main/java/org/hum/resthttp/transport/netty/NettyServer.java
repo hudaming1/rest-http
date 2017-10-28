@@ -1,11 +1,6 @@
 package org.hum.resthttp.transport.netty;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import org.hum.resthttp.common.ServerException;
-import org.hum.resthttp.invoker.bean.Invocation;
-import org.hum.resthttp.invoker.bean.Result;
 import org.hum.resthttp.transport.AbstractServer;
 import org.hum.resthttp.transport.config.ServerConfig;
 
@@ -25,6 +20,9 @@ public class NettyServer extends AbstractServer implements NettyHandleCallback {
 
 	@Override
 	public void doOpen(ServerConfig serverConfig) {
+		// TODO 0.check port used?
+		
+		// 1.start server
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		try {
@@ -52,11 +50,5 @@ public class NettyServer extends AbstractServer implements NettyHandleCallback {
 
 	@Override
 	public void close() {
-	}
-
-	@Override
-	public Result handler(Invocation invocation) throws InterruptedException, ExecutionException {
-		Future<Result> future = invokerHolder.invoke(invocation);
-		return future.get();
 	}
 }

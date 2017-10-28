@@ -1,6 +1,11 @@
 package org.hum.resthttp.transport;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.hum.resthttp.common.ServiceLoader;
+import org.hum.resthttp.invoker.bean.Invocation;
+import org.hum.resthttp.invoker.bean.Result;
 import org.hum.resthttp.invoker.holder.InvokerHolder;
 import org.hum.resthttp.serialization.Serialization;
 import org.hum.resthttp.transport.config.ServerConfig;
@@ -27,4 +32,10 @@ public abstract class AbstractServer implements Server {
 	}
 	
 	public abstract void doOpen(ServerConfig serviceConfig);
+
+	@Override
+	public Result handler(Invocation invocation) throws InterruptedException, ExecutionException {
+		Future<Result> future = invokerHolder.invoke(invocation);
+		return future.get();
+	}
 }

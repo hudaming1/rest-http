@@ -5,14 +5,12 @@ import org.hum.resthttp.invoker.enumtype.ResultCodeEum;
 public class Result {
 
 	private String code;
-	private String message;
+	private Throwable error;
 	private Object data;
 	
-	public Result() { }
-
-	public Result(ResultCodeEum resultCode, Object data) {
+	public Result(ResultCodeEum resultCode, Throwable error, Object data) {
 		this.code = resultCode.getCode();
-		this.message = resultCode.getMessage();
+		this.error = error;
 		this.data = data;
 	}
 
@@ -20,30 +18,19 @@ public class Result {
 		return code;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
 	public Object getData() {
 		return data;
 	}
 
-	public void setData(Object data) {
-		this.data = data;
+	public Throwable getError() {
+		return error;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Result [code=").append(code).append(", message=").append(message).append(", data=").append(data).append("]");
+		builder.append("Result [code=").append(code).append(", error=").append(error).append(", data=").append(data)
+				.append("]");
 		return builder.toString();
 	}
 }

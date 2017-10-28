@@ -29,10 +29,9 @@ public class DefaultInvoker extends AbstractInvoker {
 		try {
 			Object[] params = parseParamMap2ObjectArray(instance.getClass(), method.getName(), parameters);
 			Object resultData = method.invoke(instance, params);
-			return new Result(ResultCodeEum.SUCCESS, resultData);
+			return new Result(ResultCodeEum.SUCCESS, null, resultData);
 		} catch (Exception ce) {
-			ce.printStackTrace();
-			return new Result(ResultCodeEum.ERROR, null);
+			return new Result(ResultCodeEum.ERROR, ce, null);
 		}
 	}
 
