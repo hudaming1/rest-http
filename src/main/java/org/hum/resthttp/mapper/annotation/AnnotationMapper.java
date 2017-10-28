@@ -1,22 +1,44 @@
 package org.hum.resthttp.mapper.annotation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hum.resthttp.common.ServerException;
+import org.hum.resthttp.conf.Configure;
 import org.hum.resthttp.mapper.AbstractMapper;
 import org.hum.resthttp.mapper.MethodHolder;
 import org.hum.resthttp.mapper.enumtype.MethodEnumType;
 
 public class AnnotationMapper extends AbstractMapper {
 
-	private String scanDirectory = "org.hum";
-	
+	private String scanDirectory = "";
 	private final String CONFIG_FILE = "/rest-http-mapper.properties";
+	private final String SCAN_PACKAGES_FIELD = "scan-packages";
 	private final String CLASS_EXTEN = ".class";
 	
+	public AnnotationMapper() throws FileNotFoundException {
+		try {
+			scanDirectory = Configure.loadPropertieValue(CONFIG_FILE, SCAN_PACKAGES_FIELD);
+			if (scanDirectory == null) {
+				throw new ServerException("can't find field [" + SCAN_PACKAGES_FIELD + "] in file [" + CONFIG_FILE + "], please check field is exists.");
+			}
+		} catch (FileNotFoundException e) {
+			throw new FileNotFoundException("cann't find [" + CONFIG_FILE + "], please check file is exists!");
+		} catch (IOException e) {
+			throw new ServerException("load [" + CONFIG_FILE + "] error!", e);
+		}
+	}
+	
 	public void scan() throws Exception {
+		
+		if (scanDirectory == null || scanDirectory.isEmpty()) {
+			throw new IllegalArgumentException("scan packages mustn't be null, please check [" + CONFIG_FILE + "], key: " + SCAN_PACKAGES_FIELD);
+		}
+		
 		// 1.加载scanDirectory目录下的所有class文件
 		String scanPakcages = AnnotationMapper.class.getResource("/" + scanDirectory.replaceAll("\\.", File.separator)).getPath();
 		List<Class<?>> classes = scanClassFromDirectory(scanPakcages);
