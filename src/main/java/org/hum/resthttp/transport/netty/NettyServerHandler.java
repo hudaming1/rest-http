@@ -13,7 +13,6 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 
 public class NettyServerHandler extends SimpleChannelInboundHandler<DefaultHttpRequest> {
 
@@ -27,6 +26,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<DefaultHttpR
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, DefaultHttpRequest request) throws Exception {
+		
+		// 0.初始化上下文
+		NettyContext.set(request);
 		
 		/*
 		 * 1.创建Invocation
@@ -43,15 +45,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<DefaultHttpR
 
 	private HttpResponse wrapResult(Result result) {
 		String jsonString = serialization.serialize(result.getData());
-		// TODO 这里的version应该从context取
-		HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(jsonString.getBytes()));
-		return response;
+		return new DefaultFullHttpResponse(NettyContext.get().protocolVersion(), HttpResponseStatus.OK, Unpooled.wrappedBuffer(jsonString.getBytes()));
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		
 		// 这里可以考虑如何打出异常堆栈（堆栈输出依赖Stream，但NIO中却没有Stream的概念，这该如何输出）
-		HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(cause.getMessage().getBytes()));
+		HttpResponse response = new DefaultFullHttpResponse(NettyContext.get().protocolVersion(), HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(cause.getMessage().getBytes()));
 		
 		// 如果抛出的是restful异常，则遵循HTTP错误码标准输出
 		if (cause instanceof RestfulException) {
@@ -60,4 +61,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<DefaultHttpR
 		ctx.fireExceptionCaught(cause);
 		ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 	}
+
+	@Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+		NettyContext.remove();
+        ctx.fireChannelReadComplete();
+    }
 }
