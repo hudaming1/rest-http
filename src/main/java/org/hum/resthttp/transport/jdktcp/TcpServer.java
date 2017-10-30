@@ -1,14 +1,15 @@
 package org.hum.resthttp.transport.jdktcp;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
 
+import org.hum.resthttp.common.RestfulException;
 import org.hum.resthttp.common.ServerException;
 import org.hum.resthttp.common.ServiceLoader;
 import org.hum.resthttp.invoker.bean.Invocation;
@@ -100,9 +101,15 @@ public class TcpServer extends AbstractServer {
 	// TODO 我想把这个方法也移到TcpUtils里去，由于依赖TcpServer对象，所以只能放到这里了，有什么好的解决办法吗？
 	private HttpResponse parseResponse(Result result) {
 		HttpRequest httpRequest = serverContext.get();
-		HttpStatusEnum httpCode = ResultCodeEum.SUCCESS.getCode().equals(result.getCode())? HttpStatusEnum.OK: HttpStatusEnum.INTERNAL_ERROR;
-		String content = serialization.serialize(result.getData());
-		return new HttpResponse(httpRequest.getProtocolVersion(), httpCode, content);
+		
+		if (ResultCodeEum.SUCCESS.getCode().equals(result.getCode())) {
+			String content = serialization.serialize(result.getData());
+			return new HttpResponse(httpRequest.getProtocolVersion(), HttpStatusEnum.OK, content);
+		} else if (result.getError() instanceof RestfulException) {
+			return new HttpResponse(httpRequest.getProtocolVersion(), ((RestfulException)result.getError()).getHttpCode(), result.getError().getMessage());
+		} else {
+			return new HttpResponse(httpRequest.getProtocolVersion(), HttpStatusEnum.INTERNAL_ERROR, result.getError().toString());
+		}
 	}
 	
 	private Result handlerSocket(InputStream inputStream) throws IOException, InterruptedException, ExecutionException {
@@ -121,13 +128,12 @@ public class TcpServer extends AbstractServer {
 	}
 	
 	private void flushResponse(OutputStream outputStream, HttpResponse response) throws IOException {
-		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(outputStream));
-		// TODO 研究一下，响应头为什么当做内容输出了
-//		HttpStatusEnum httpCode = response.getCode();
-//		bw.write(response.getProtocolVersion() + " " + httpCode.getCode() + " " + httpCode.getMsg() + "\n");
-//		bw.write("\n"); // header我就不输出了(不知道这样行不行，http规范中header是必须的吗？)
-//		bw.write("\n");
-		bw.write(response.getContent());
-		bw.flush();
+		PrintWriter pw = new PrintWriter(new OutputStreamWriter(outputStream));
+		HttpStatusEnum httpCode = response.getCode();
+		// 简单实现，就省略header不打印了
+		pw.println(response.getProtocolVersion() + " " + httpCode.getCode() + " " + httpCode.getMsg());
+		pw.println("");  // 打印空行，取分响应头和报文
+		pw.println(response.getContent());
+		pw.flush();
 	}
 }
