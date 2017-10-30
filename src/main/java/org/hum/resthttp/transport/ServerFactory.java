@@ -1,6 +1,6 @@
 package org.hum.resthttp.transport;
 
-import org.hum.resthttp.common.ServiceLoader;
+import org.hum.resthttp.loader.ServiceLoaderHolder;
 
 public class ServerFactory {
 
@@ -8,7 +8,7 @@ public class ServerFactory {
 	
 	public static synchronized Server get() {
 		if (transporter == null) {
-			transporter = ServiceLoader.load(Server.class);
+			transporter = ServiceLoaderHolder.load(Server.class);
 		}
 		return transporter;
 	}

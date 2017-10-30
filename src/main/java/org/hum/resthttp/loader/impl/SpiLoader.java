@@ -1,8 +1,15 @@
-package org.hum.resthttp.common;
+package org.hum.resthttp.loader.impl;
 
-public class ServiceLoader {
+import org.hum.resthttp.loader.AbstractServiceLoader;
 
-	public static <T> T load(Class<T> service) {
+public class SpiLoader extends AbstractServiceLoader {
+	
+	public SpiLoader() { }
+	public SpiLoader(int sort) {
+		super(sort);
+	}
+
+	public <T> T load(Class<T> service) {
 		if (service == null) {
 			throw new NullPointerException("service param mustn't be null");
 		}

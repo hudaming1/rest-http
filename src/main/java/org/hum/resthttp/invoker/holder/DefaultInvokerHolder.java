@@ -5,21 +5,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.hum.resthttp.common.RestfulException;
-import org.hum.resthttp.common.ServiceLoader;
 import org.hum.resthttp.executors.ThreadPoolFactory;
 import org.hum.resthttp.invoker.Invoker;
 import org.hum.resthttp.invoker.bean.Invocation;
 import org.hum.resthttp.invoker.bean.Result;
 import org.hum.resthttp.invoker.wrapper.InvokerWrapper;
+import org.hum.resthttp.loader.ServiceLoaderHolder;
 import org.hum.resthttp.mapper.Mapper;
 import org.hum.resthttp.mapper.MethodHolder;
 import org.hum.resthttp.transport.enumtype.HttpStatusEnum;
 
 public class DefaultInvokerHolder implements InvokerHolder {
 	
-	private Mapper mapper = ServiceLoader.load(Mapper.class);
-	private InvokerWrapper invokerWrapper = ServiceLoader.load(InvokerWrapper.class);
-	private ThreadPoolFactory threadPoolFactory = ServiceLoader.load(ThreadPoolFactory.class);
+	private Mapper mapper = ServiceLoaderHolder.load(Mapper.class);
+	private InvokerWrapper invokerWrapper = ServiceLoaderHolder.load(InvokerWrapper.class);
+	private ThreadPoolFactory threadPoolFactory = ServiceLoaderHolder.load(ThreadPoolFactory.class);
 	private ExecutorService executorService;
 	
 	public DefaultInvokerHolder() {

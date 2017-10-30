@@ -11,10 +11,10 @@ import java.util.concurrent.ExecutionException;
 
 import org.hum.resthttp.common.RestfulException;
 import org.hum.resthttp.common.ServerException;
-import org.hum.resthttp.common.ServiceLoader;
 import org.hum.resthttp.invoker.bean.Invocation;
 import org.hum.resthttp.invoker.bean.Result;
 import org.hum.resthttp.invoker.enumtype.ResultCodeEum;
+import org.hum.resthttp.loader.ServiceLoaderHolder;
 import org.hum.resthttp.serialization.Serialization;
 import org.hum.resthttp.transport.AbstractServer;
 import org.hum.resthttp.transport.config.ServerConfig;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class TcpServer extends AbstractServer {
 
 	private ServerContext<HttpRequest> serverContext = new ServerContext<>();
-	private Serialization serialization = ServiceLoader.load(Serialization.class);
+	private Serialization serialization = ServiceLoaderHolder.load(Serialization.class);
 	private static final Logger logger = LoggerFactory.getLogger(TcpServer.class);
 	private volatile boolean isRun = false;
 

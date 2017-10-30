@@ -3,10 +3,10 @@ package org.hum.resthttp.transport;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.hum.resthttp.common.ServiceLoader;
 import org.hum.resthttp.invoker.bean.Invocation;
 import org.hum.resthttp.invoker.bean.Result;
 import org.hum.resthttp.invoker.holder.InvokerHolder;
+import org.hum.resthttp.loader.ServiceLoaderHolder;
 import org.hum.resthttp.serialization.Serialization;
 import org.hum.resthttp.transport.config.ServerConfig;
 
@@ -16,8 +16,8 @@ import org.hum.resthttp.transport.config.ServerConfig;
 public abstract class AbstractServer implements Server {
 	
 	private volatile boolean isRun = false;
-	protected InvokerHolder invokerHolder = ServiceLoader.load(InvokerHolder.class);
-	protected Serialization serialization = ServiceLoader.load(Serialization.class);
+	protected InvokerHolder invokerHolder = ServiceLoaderHolder.load(InvokerHolder.class);
+	protected Serialization serialization = ServiceLoaderHolder.load(Serialization.class);
 
 	public void start(ServerConfig serviceConfig) {
 		
