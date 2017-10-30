@@ -15,14 +15,20 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 
 public class NettyServer extends AbstractServer implements NettyHandleCallback {
-	
-	final NettyServer nettyServer = this;
 
 	@Override
-	public void doOpen(ServerConfig serverConfig) {
-		// TODO 0.check port used?
-		
+	public void doOpen(final ServerConfig serverConfig) {
 		// 1.start server
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				asynBind(serverConfig);
+			}
+		}).start();
+	}
+	
+	private void asynBind(ServerConfig serverConfig) {
+		final NettyServer nettyServer = this;
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		try {

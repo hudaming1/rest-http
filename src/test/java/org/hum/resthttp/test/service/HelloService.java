@@ -1,4 +1,4 @@
-package org.hum.resthttp.test;
+package org.hum.resthttp.test.service;
 
 import org.springframework.stereotype.Service;
 

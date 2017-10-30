@@ -15,17 +15,19 @@ import org.hum.resthttp.transport.config.ServerConfig;
  */
 public abstract class AbstractServer implements Server {
 	
-	private volatile boolean isRun = false;
+	protected volatile boolean serverIsRun = false;
 	protected InvokerHolder invokerHolder = ServiceLoaderHolder.load(InvokerHolder.class);
 	protected Serialization serialization = ServiceLoaderHolder.load(Serialization.class);
 
 	public void start(ServerConfig serviceConfig) {
 		
 		// unsafe
-		if (isRun) {
+		if (serverIsRun) {
 			return;
 		}
-		isRun = true;
+		serverIsRun = true;
+
+		// 1.check port used?
 		
 		// 2.start server
 		doOpen(serviceConfig);

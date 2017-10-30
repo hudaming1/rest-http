@@ -1,9 +1,10 @@
-package org.hum.resthttp.test;
+package org.hum.resthttp.test.resources;
 
 import javax.annotation.Resource;
 
 import org.hum.resthttp.mapper.annotation.Get;
 import org.hum.resthttp.mapper.annotation.Post;
+import org.hum.resthttp.test.service.HelloService;
 
 public class HelloResource {
 	

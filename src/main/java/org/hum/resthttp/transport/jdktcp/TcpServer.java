@@ -32,27 +32,22 @@ public class TcpServer extends AbstractServer {
 	private ServerContext<HttpRequest> serverContext = new ServerContext<>();
 	private Serialization serialization = ServiceLoaderHolder.load(Serialization.class);
 	private static final Logger logger = LoggerFactory.getLogger(TcpServer.class);
-	private volatile boolean isRun = false;
+	private ServerSocket server = null;
 
 	@Override
 	public void close() {
-		isRun = false;
 	}
 
 	@Override
 	public void doOpen(ServerConfig serverConfig) {
-		ServerSocket server = null;
 		try {
-			if (isRun) {
-				return;
-			}
 			// 1.start server
-			isRun = true;
 			server = new ServerSocket(serverConfig.getPort());
 			logger.info("Tcp server start, listening on port: " + serverConfig.getPort());
 			
-			// 2.listening 
-			listening(server);
+			// 2.listening (asyn)
+			asynListening(server);
+			
 		} catch (IOException e) {
 			throw new ServerException("start TcpServer error!", e);
 		} finally {
@@ -66,22 +61,32 @@ public class TcpServer extends AbstractServer {
 		}
 	}
 	
-	private void listening(ServerSocket server) throws IOException {
-		while (isRun) {
-			Socket socket = server.accept();
+	private void asynListening(final ServerSocket server) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				listening(server);					
+			}
+		}).start();
+	}
+	
+	private void listening(ServerSocket server) {
+		while (serverIsRun) {
+			Socket socket = null;
 			InputStream inputStream = null;
 			OutputStream outputStream = null;
 			try {
+				socket = server.accept();
 				inputStream = socket.getInputStream();
 				outputStream = socket.getOutputStream();
-				
+
 				// 3.handle request
-				Result result = handlerSocket(inputStream);	
-				
+				Result result = handlerSocket(inputStream);
+
 				// 4.parse to response
 				HttpResponse response = parseResponse(result);
-				
-				// 5.output response 
+
+				// 5.output response
 				flushResponse(outputStream, response);
 			} catch (Exception e) {
 				// x.output exception

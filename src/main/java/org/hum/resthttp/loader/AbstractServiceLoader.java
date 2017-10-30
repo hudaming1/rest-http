@@ -1,5 +1,6 @@
 package org.hum.resthttp.loader;
 
+@SuppressWarnings("unchecked")
 public abstract class AbstractServiceLoader implements ServiceLoader {
 
 	private int sort;
@@ -11,6 +12,10 @@ public abstract class AbstractServiceLoader implements ServiceLoader {
 	
 	public AbstractServiceLoader(int sort) {
 		this.sort = sort;
+	}
+
+	public <T> Class<T> loadImplementsClassType(Class<T> service) {
+		return (Class<T>) load(service).getClass();
 	}
 	
 	public int getSort() {

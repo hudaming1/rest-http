@@ -7,7 +7,7 @@
     http://www.hum.org/schema/rest_http http://www.hum.org/schema/rest_http/rest_http.xsd">
 
 	<!-- RestHttpServerBeanDefinition -->
-	<rest_http:server port="9080" />
+	<rest_http:server port="9080" id="server" />
 	
 	<!-- mapper how to load -->
 	
