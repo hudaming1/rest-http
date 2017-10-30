@@ -2,11 +2,11 @@ package org.hum.resthttp.invoker.holder;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.hum.resthttp.common.RestfulException;
 import org.hum.resthttp.common.ServiceLoader;
+import org.hum.resthttp.executors.ThreadPoolFactory;
 import org.hum.resthttp.invoker.Invoker;
 import org.hum.resthttp.invoker.bean.Invocation;
 import org.hum.resthttp.invoker.bean.Result;
@@ -19,11 +19,12 @@ public class DefaultInvokerHolder implements InvokerHolder {
 	
 	private Mapper mapper = ServiceLoader.load(Mapper.class);
 	private InvokerWrapper invokerWrapper = ServiceLoader.load(InvokerWrapper.class);
+	private ThreadPoolFactory threadPoolFactory = ServiceLoader.load(ThreadPoolFactory.class);
 	private ExecutorService executorService;
 	
 	public DefaultInvokerHolder() {
 		// init thread-pool
-		executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+		executorService = threadPoolFactory.create();
 		// scan restful class
 		try {
 			mapper.scan();
