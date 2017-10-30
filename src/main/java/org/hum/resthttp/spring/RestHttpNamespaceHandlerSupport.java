@@ -7,5 +7,6 @@ public class RestHttpNamespaceHandlerSupport extends NamespaceHandlerSupport {
 	@Override
 	public void init() {
 		registerBeanDefinitionParser("server", new HttpServerBeanDefinition());
+		registerBeanDefinitionParser("mapper", new MapperBeanDefinition());
 	}
 }

@@ -6,6 +6,7 @@ import org.hum.resthttp.invoker.bean.Result;
 import org.hum.resthttp.serialization.Serialization;
 import org.hum.resthttp.transport.context.ServerContext;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -54,13 +55,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<DefaultHttpR
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		
-		// 这里可以考虑如何打出异常堆栈（堆栈输出依赖Stream，但NIO中却没有Stream的概念，这该如何输出）
-		HttpResponse response = new DefaultFullHttpResponse(serverContext.get().protocolVersion(), HttpResponseStatus.INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(cause.getMessage().getBytes()));
+		// TODO 1 这里设计的有问题，有时候接不住异常(DefaultInvokerHolder.vaildate没有catch住时问题可现)
+		// TODO 2 这里可以考虑如何打出异常堆栈（堆栈输出依赖Stream，但NIO中却没有Stream的概念，这该如何输出）
+		ByteBuf byteBuf = Unpooled.wrappedBuffer(cause.getMessage().getBytes());
+		HttpResponse response = new DefaultFullHttpResponse(serverContext.get().protocolVersion(), HttpResponseStatus.INTERNAL_SERVER_ERROR, byteBuf);
 		
 		// 如果抛出的是restful异常，则遵循HTTP错误码标准输出
 		if (cause instanceof RestfulException) {
 			response.setStatus(NettyHttpUtils.parseStatus(((RestfulException) cause).getHttpCode().getCode()));
-		}
+		} 
 		ctx.fireExceptionCaught(cause);
 		ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 	}

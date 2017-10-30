@@ -11,4 +11,10 @@
             <xsd:attribute name="port" type="xsd:string" />  
         </xsd:complexType>  
     </xsd:element>  
+     <xsd:element name="mapper">  
+        <xsd:complexType>  
+            <xsd:attribute name="id" type="xsd:string" />  
+            <xsd:attribute name="scan-packages" type="xsd:string" />  
+        </xsd:complexType>  
+    </xsd:element>  
 </xsd:schema>

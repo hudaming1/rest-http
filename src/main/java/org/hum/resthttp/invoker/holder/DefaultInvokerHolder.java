@@ -11,13 +11,12 @@ import org.hum.resthttp.invoker.bean.Invocation;
 import org.hum.resthttp.invoker.bean.Result;
 import org.hum.resthttp.invoker.wrapper.InvokerWrapper;
 import org.hum.resthttp.loader.ServiceLoaderHolder;
-import org.hum.resthttp.mapper.Mapper;
+import org.hum.resthttp.mapper.MapperHolder;
 import org.hum.resthttp.mapper.MethodHolder;
 import org.hum.resthttp.transport.enumtype.HttpStatusEnum;
 
 public class DefaultInvokerHolder implements InvokerHolder {
 	
-	private Mapper mapper = ServiceLoaderHolder.load(Mapper.class);
 	private InvokerWrapper invokerWrapper = ServiceLoaderHolder.load(InvokerWrapper.class);
 	private ThreadPoolFactory threadPoolFactory = ServiceLoaderHolder.load(ThreadPoolFactory.class);
 	private ExecutorService executorService;
@@ -25,17 +24,11 @@ public class DefaultInvokerHolder implements InvokerHolder {
 	public DefaultInvokerHolder() {
 		// init thread-pool
 		executorService = threadPoolFactory.create();
-		// scan restful class
-		try {
-			mapper.scan();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	@Override
 	public Invoker get(String url) {
-		MethodHolder methodHolder = mapper.get(url);
+		MethodHolder methodHolder = MapperHolder.get(url);
 		if (methodHolder == null) {
 			throw new RestfulException(HttpStatusEnum.URL_NOT_FOUND, "url [" + url + "] not mappered");
 		}
@@ -57,7 +50,7 @@ public class DefaultInvokerHolder implements InvokerHolder {
 	}
 	
 	private void validate(Invocation invocation) {
-		MethodHolder methodHolder = mapper.get(invocation.getUrl());
+		MethodHolder methodHolder = MapperHolder.get(invocation.getUrl());
 		if (!methodHolder.getHttpMethod().getDesc().equalsIgnoreCase(invocation.getMethod())) {
 			throw new RestfulException(HttpStatusEnum.METHOD_NOT_ALLOW, "method don't support");
 		}

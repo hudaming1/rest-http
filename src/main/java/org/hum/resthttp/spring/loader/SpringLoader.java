@@ -1,4 +1,4 @@
-package org.hum.resthttp.spring;
+package org.hum.resthttp.spring.loader;
 
 import org.hum.resthttp.loader.AbstractServiceLoader;
 import org.hum.resthttp.loader.ServiceLoaderHolder;

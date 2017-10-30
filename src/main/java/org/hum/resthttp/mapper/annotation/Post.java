@@ -12,6 +12,5 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface Post {
-
 	String url();
 }
