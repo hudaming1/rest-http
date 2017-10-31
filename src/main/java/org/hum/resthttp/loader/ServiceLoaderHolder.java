@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.hum.resthttp.loader.impl.SpiLoader;
+import org.hum.resthttp.loader.impl.PropertiesServiceLoader;
 
 /**
  * ServiceLoaderHolder可持有多个类型加载器（默认情况下仅有SpiLoader），在加载类型时，会
@@ -21,7 +21,11 @@ public class ServiceLoaderHolder {
 	private static Object lock = new Object();
 
 	static {
-		createServiceLoader(new SpiLoader());
+		// 弃用SPI加载：配置太零散，一个文件仅相当于一个键值对。
+		// createServiceLoader(new SpiLoader());
+		
+		// 目前还是考虑使用.properties作为配置文件，可以将配置集中管理化
+		createServiceLoader(new PropertiesServiceLoader());
 	}
 
 	public static <T> T load(Class<T> service) {

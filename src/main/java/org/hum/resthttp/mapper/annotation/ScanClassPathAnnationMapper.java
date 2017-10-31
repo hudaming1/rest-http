@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hum.resthttp.common.ServerException;
-import org.hum.resthttp.conf.Configure;
+import org.hum.resthttp.common.util.PropertiesLoader;
 
 public class ScanClassPathAnnationMapper extends AnnotationMapper {
 
@@ -17,7 +17,7 @@ public class ScanClassPathAnnationMapper extends AnnotationMapper {
 
 	public ScanClassPathAnnationMapper() throws FileNotFoundException {
 		try {
-			scanDirectory = Configure.loadPropertieValue(CONFIG_FILE, SCAN_PACKAGES_FIELD);
+			scanDirectory = PropertiesLoader.loadPropertieValue(CONFIG_FILE, SCAN_PACKAGES_FIELD);
 			if (scanDirectory == null) {
 				throw new ServerException("can't find field [" + SCAN_PACKAGES_FIELD + "] in file [" + CONFIG_FILE + "], please check field is exists.");
 			}
