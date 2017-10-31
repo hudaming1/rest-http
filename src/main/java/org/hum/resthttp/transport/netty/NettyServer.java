@@ -56,5 +56,6 @@ public class NettyServer extends AbstractServer implements NettyHandleCallback {
 
 	@Override
 	public void close() {
+		// TODO netty how to closed?
 	}
 }

@@ -36,6 +36,17 @@ public class TcpServer extends AbstractServer {
 
 	@Override
 	public void close() {
+		// 1.请求入口先关闭
+		serverIsRun = false;
+		
+		// 2.等待正在执行中的请求完成
+		while (currentRequest.get() > 0) {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override

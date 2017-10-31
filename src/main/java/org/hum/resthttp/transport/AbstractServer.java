@@ -2,6 +2,7 @@ package org.hum.resthttp.transport;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hum.resthttp.invoker.bean.Invocation;
 import org.hum.resthttp.invoker.bean.Result;
@@ -18,7 +19,8 @@ public abstract class AbstractServer implements Server {
 	protected volatile boolean serverIsRun = false;
 	protected InvokerHolder invokerHolder = ServiceLoaderHolder.load(InvokerHolder.class);
 	protected Serialization serialization = ServiceLoaderHolder.load(Serialization.class);
-
+	protected AtomicInteger currentRequest = new AtomicInteger(0);
+	
 	public void start(ServerConfig serviceConfig) {
 		
 		// unsafe
@@ -27,7 +29,7 @@ public abstract class AbstractServer implements Server {
 		}
 		serverIsRun = true;
 
-		// 1.check port used?
+		// 1.check port used? TODO
 		
 		// 2.start server
 		doOpen(serviceConfig);
@@ -37,7 +39,11 @@ public abstract class AbstractServer implements Server {
 
 	@Override
 	public Result handler(Invocation invocation) throws InterruptedException, ExecutionException {
+		// TODO 这里最好做一个filter
+		currentRequest.incrementAndGet();
 		Future<Result> future = invokerHolder.invoke(invocation);
-		return future.get();
+		Result result = future.get();
+		currentRequest.decrementAndGet();
+		return result;
 	}
 }
