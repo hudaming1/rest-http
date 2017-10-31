@@ -56,11 +56,11 @@ public class PropertiesServiceLoader extends AbstractServiceLoader {
 		}
 		
 		String serverClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.server);
-		if (serverClassName != null & !serverClassName.isEmpty()) {
+		if (serverClassName != null && !serverClassName.isEmpty()) {
 			registImplementsClass(Server.class, serverClassName);
 		}
 		String serializeClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.serialize);
-		if (serializeClassName != null & !serverClassName.isEmpty()) {
+		if (serializeClassName != null && !serverClassName.isEmpty()) {
 			registImplementsClass(Serialization.class, serializeClassName);
 		}
 		String mapperClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.mapper);

@@ -24,7 +24,6 @@ public class PropertiesLoader {
 				return propertiesMap.get(file).get(key);
 			}
 			Map<String, String> propMap = loadProperties(file);
-			propertiesMap.put(file, propMap);
 			return propMap.get(key);
 		}
 	}
