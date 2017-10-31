@@ -3,12 +3,17 @@ package org.hum.resthttp.loader.impl;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.hum.resthttp.common.util.PropertiesLoader;
 import org.hum.resthttp.conf.PropertiesConfigKey;
+import org.hum.resthttp.executors.ThreadPoolFactory;
+import org.hum.resthttp.invoker.holder.InvokerHolder;
+import org.hum.resthttp.invoker.wrapper.InvokerWrapper;
 import org.hum.resthttp.loader.AbstractServiceLoader;
+import org.hum.resthttp.mapper.Mapper;
+import org.hum.resthttp.serialization.Serialization;
+import org.hum.resthttp.transport.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,119 +27,94 @@ public class PropertiesServiceLoader extends AbstractServiceLoader {
 	private static final String PROPERTIES_EXTEN_FILE = "/rest-http.properties";
 	// instance map
 	private static final Map<Class<?>, Object> INSTANCES_MAP = new ConcurrentHashMap<>();
+	// key-interfaceClass, value-implementsClass
+	private static final Map<Class<?>, Class<?>> IMPLEMENTS_CLASS_MAP = new ConcurrentHashMap<Class<?>, Class<?>>();
+	
+	private final Object LOAD_LOCK = new Object();
 	
 	{
-		RestConfig restConfig = new RestConfig();
 		// 1.读取默认配置
 		try {
-			restConfig = loadProperties(restConfig, PROPERTIES_FILE);
+			loadProperties(PROPERTIES_FILE);
 			logger.info("load properties[" + PROPERTIES_FILE + "] complete");
 		} catch (IOException e) {
 			logger.error("load properties [" + PROPERTIES_FILE + "] occured exception", e);
 		}
 		// 2.读取客户端配置(覆盖框架默认配置)
 		try {
-			restConfig = loadProperties(restConfig, PROPERTIES_EXTEN_FILE);
+			loadProperties(PROPERTIES_EXTEN_FILE);
 			logger.info("load properties[" + PROPERTIES_EXTEN_FILE + "] complete");
 		} catch (IOException e) {
 			logger.error("load properties [" + PROPERTIES_EXTEN_FILE + "] occured exception", e);
 		}
-		// 3.实例化 (目前Properties方式和SPI实例化一个类时使用的方式一样，都是只能调用无参构造方法 bad smell)
-		//loadClassAndInstance(restConfig);
-		//logger.info("load class and instances complete");
-		
-		// 4.验证必要加载项
-		//validate(INSTANCES_MAP);
-		//logger.info("load instances is ok");
 	}
 	
-	private void validate(Map<Class<?>, Object> instancesMap) {
-		for (Entry<Class<?>, Object> entry : instancesMap.entrySet()) {
-			logger.info("[" + entry.getKey().getName() + "] class has been load");
-		}
-	}
-	
-	private void loadClassAndInstance(RestConfig restConfig) {
-		if (restConfig == null) {
-			return;
-		}
-		loadClassAndInstance(restConfig.threadpoolClass);
-		loadClassAndInstance(restConfig.invokerHolderClass);
-		loadClassAndInstance(restConfig.serializeClass);
-		loadClassAndInstance(restConfig.invokerClass);
-		loadClassAndInstance(restConfig.mapperClass);
-		loadClassAndInstance(restConfig.serverClass);
-	}
-	
-	private void loadClassAndInstance(String className) {
-		if (className == null || className.isEmpty()) {
-			logger.info("class name is null, ignore load..");
-			return;
-		}
-		try {
-			Class<?>serviceClassType = Class.forName(className);
-			load(serviceClassType);
-			logger.info("load class and instance [" + serviceClassType.getName() + "]");
-		} catch (ClassNotFoundException e) {
-			logger.error("load class[" + className + "] occured exception, class not found!", e);
-		}
-	}
-	
-	private RestConfig loadProperties(RestConfig restConfig, String file) throws UnsupportedEncodingException, IOException {
+	private void loadProperties(String file) throws UnsupportedEncodingException, IOException {
 		if (PropertiesLoader.class.getResource(file) == null) {
 			logger.info("cann't find file[" + file + "], ignore...");
-			return restConfig;
+			return ;
 		}
 		
 		String serverClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.server);
 		if (serverClassName != null & !serverClassName.isEmpty()) {
-			restConfig.serverClass = serverClassName;
+			registImplementsClass(Server.class, serverClassName);
 		}
 		String serializeClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.serialize);
 		if (serializeClassName != null & !serverClassName.isEmpty()) {
-			restConfig.serializeClass = serializeClassName;
+			registImplementsClass(Serialization.class, serializeClassName);
 		}
 		String mapperClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.mapper);
 		if (mapperClassName != null && !mapperClassName.isEmpty()) {
-			restConfig.mapperClass = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.mapper);
+			registImplementsClass(Mapper.class, mapperClassName);
 		}
 		String invokerClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.invoker);
 		if (invokerClassName != null && !invokerClassName.isEmpty()) {
-			restConfig.invokerClass = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.invoker);
+			registImplementsClass(InvokerWrapper.class, invokerClassName);
 		}
 		String invokerHolderClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.invokerHolder);
 		if (invokerHolderClassName != null && !invokerHolderClassName.isEmpty()) {
-			restConfig.invokerHolderClass = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.invokerHolder);
+			registImplementsClass(InvokerHolder.class, invokerHolderClassName);
 		}
 		String threadpoolClassName = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.threadpool);
 		if (threadpoolClassName != null && !threadpoolClassName.isEmpty()) {
-			restConfig.threadpoolClass = PropertiesLoader.loadPropertieValue(file, PropertiesConfigKey.threadpool);
+			registImplementsClass(ThreadPoolFactory.class, threadpoolClassName);
 		}
-		return restConfig;
+	}
+	
+	private void registImplementsClass(Class<?> interfaceType, String implementsClassName) {
+		try {
+			IMPLEMENTS_CLASS_MAP.put(interfaceType, Class.forName(implementsClassName));
+		} catch (ClassNotFoundException e) {
+			logger.error("find interface type[" + interfaceType.getName() + "] occured exception, class not found:" + implementsClassName);
+		}
 	}
 
 	@Override
-	public <T> T load(Class<T> service) {
+	public <T> T load(Class<T> service) throws ClassNotFoundException {
 		Object instances = INSTANCES_MAP.get(service);
-		if (instances == null) {
+		if (instances != null) {
+			return (T) instances;
+		}
+		synchronized (LOAD_LOCK) {
 			try {
-				instances = service.newInstance();
+				
+				// 1.先找到对应实现类
+				Class<?> implementsClass = IMPLEMENTS_CLASS_MAP.get(service);
+				
+				if (implementsClass == null) {
+					throw new ClassNotFoundException("cann't load class type[" + service.getName() + "], because no implements class found ");
+				}
+
+				// 2.根据实现类进行实例化
+				instances = implementsClass.newInstance();
+
+				// 3.再放到Map中
 				INSTANCES_MAP.put(service, instances);
 				return (T) instances;
 			} catch (InstantiationException | IllegalAccessException e) {
 				logger.error("load class[" + service.getName() + "] and create instances occured exception", e);
 			}
+			return (T) INSTANCES_MAP.get(service);
 		}
-		return (T) INSTANCES_MAP.get(service);
-	}
-	
-	// bad smell 只能这么设计吗？没有更好的办法了吗？多么繁琐...如果一旦增加一个字段，上面代码都要改....
-	private static class RestConfig {
-		public String serverClass;
-		public String serializeClass;
-		public String mapperClass;
-		public String invokerClass;
-		public String invokerHolderClass;
-		public String threadpoolClass;
 	}
 }

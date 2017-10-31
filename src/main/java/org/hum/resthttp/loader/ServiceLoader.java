@@ -4,7 +4,7 @@ public interface ServiceLoader {
 	
 	public int getSort();
 
-	public <T> Class<T> loadImplementsClassType(Class<T> service);
+	public <T> Class<T> loadImplementsClassType(Class<T> service) throws ClassNotFoundException;
 	
-	public <T> T load(Class<T> service);
+	public <T> T load(Class<T> service) throws ClassNotFoundException;
 }

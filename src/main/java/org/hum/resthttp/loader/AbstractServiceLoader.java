@@ -14,7 +14,7 @@ public abstract class AbstractServiceLoader implements ServiceLoader {
 		this.sort = sort;
 	}
 
-	public <T> Class<T> loadImplementsClassType(Class<T> service) {
+	public <T> Class<T> loadImplementsClassType(Class<T> service) throws ClassNotFoundException {
 		return (Class<T>) load(service).getClass();
 	}
 	
