@@ -16,6 +16,8 @@
 	<!-- 
 	<rest_http:mapper scan-packages="org.hum.resthttp.test" />
 	 -->
+	 
+	<bean class="org.hum.resthttp.spring.mapper.SpringBeanMapper" />
 	
     <context:component-scan base-package="org.hum.resthttp.test"/>
 	

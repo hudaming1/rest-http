@@ -5,7 +5,9 @@ import javax.annotation.Resource;
 import org.hum.resthttp.mapper.annotation.Get;
 import org.hum.resthttp.mapper.annotation.Post;
 import org.hum.resthttp.test.service.HelloService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class HelloResource {
 	
 	@Resource

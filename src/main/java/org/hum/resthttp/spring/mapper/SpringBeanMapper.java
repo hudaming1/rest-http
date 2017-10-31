@@ -18,7 +18,6 @@ public class SpringBeanMapper implements BeanPostProcessor {
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		try {
 			mapper.process(bean);
-			System.out.println(bean);
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
