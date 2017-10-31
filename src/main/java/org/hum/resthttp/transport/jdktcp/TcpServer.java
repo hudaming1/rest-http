@@ -50,22 +50,24 @@ public class TcpServer extends AbstractServer {
 			
 		} catch (IOException e) {
 			throw new ServerException("start TcpServer error!", e);
-		} finally {
-			if (server != null) {
-				try {
-					server.close();
-				} catch (IOException e) {
-					logger.error("occured excepiton when TcpServer closed.", e);
-				}
-			}
-		}
+		} 
 	}
 	
 	private void asynListening(final ServerSocket server) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				listening(server);					
+				try {
+					listening(server);					
+				} finally {
+					if (server != null) {
+						try {
+							server.close();
+						} catch (IOException e) {
+							logger.error("occured excepiton when TcpServer closed.", e);
+						}
+					}
+				}
 			}
 		}).start();
 	}
